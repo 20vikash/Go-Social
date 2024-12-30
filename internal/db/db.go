@@ -16,7 +16,7 @@ func New(addr string, maxOpenConns, maxIdleConns int, maxIdleTime string) (*sql.
 	db.SetMaxIdleConns(maxIdleConns)
 
 	duration, err := time.ParseDuration(maxIdleTime)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
