@@ -3,3 +3,4 @@ social
 .air.toml
 bin
 .envrc
+Dockerfile
