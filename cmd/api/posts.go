@@ -10,14 +10,19 @@ import (
 )
 
 type createPostPayload struct {
-	Title   string   `json:"title"`
-	Content string   `json:"content"`
-	Tags    []string `json:"tags"`
+	Title   string   `json:"title" validate:"required,max=100"`
+	Content string   `json:"content" validate:"required,max=1000"`
+	Tags    []string `json:"tags" validate:""`
 }
 
 func (app *application) createPostHandler(w http.ResponseWriter, r *http.Request) {
 	var payload createPostPayload
 	if err := readJSON(w, r, &payload); err != nil {
+		app.badRequestError(w, r, err)
+		return
+	}
+
+	if err := Validate.Struct(payload); err != nil {
 		app.badRequestError(w, r, err)
 		return
 	}
