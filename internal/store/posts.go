@@ -17,6 +17,7 @@ type Post struct {
 	Tags      []string  `json:"tags"`
 	CreatedAt string    `json:"created_at"`
 	UpdatedAt string    `json:"updated_at"`
+	Version   int       `json:"version"`
 	Comments  []Comment `json:"comments"`
 }
 
@@ -68,6 +69,7 @@ func (s *PostStore) GetById(ctx context.Context, postId int) (*Post, error) {
 		&created_at,
 		pq.Array(&post.Tags),
 		&updated_at,
+		&post.Version,
 	)
 
 	post.CreatedAt = created_at.Format(time.RFC3339)
@@ -115,13 +117,19 @@ func (s *PostStore) Delete(c context.Context, postID int) error {
 func (s *PostStore) Patch(c context.Context, post *Post) error {
 	query := `
 		UPDATE posts
-		SET title = $1, content = $2
-		WHERE id = $3;
+		SET title = $1, content = $2, version = version+1
+		WHERE id = $3 AND version = $4
+		RETURNING version;
 	`
 
-	_, err := s.db.ExecContext(c, query, post.Title, post.Content, post.ID)
+	err := s.db.QueryRowContext(c, query, post.Title, post.Content, post.ID, post.Version).Scan(&post.Version)
 	if err != nil {
-		return err
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrNotFound
+		default:
+			return err
+		}
 	}
 
 	return nil

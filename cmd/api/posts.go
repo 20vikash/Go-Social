@@ -118,7 +118,13 @@ func (app *application) patchPostHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	if err := app.store.Posts.Patch(r.Context(), post); err != nil {
-		app.internalServerError(w, r, err)
+		switch {
+		case errors.Is(err, store.ErrNotFound):
+			app.conflictError(w, r, err)
+		default:
+			app.internalServerError(w, r, err)
+		}
+
 		return
 	}
 
