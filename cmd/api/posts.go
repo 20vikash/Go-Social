@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"social/social/internal/store"
 	"strconv"
@@ -66,6 +67,15 @@ func (app *application) getPostHandler(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	comments, err := app.store.Comments.GetByPostId(ctx, int64(postId))
+	if err != nil {
+		log.Println("Here bro")
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	post.Comments = comments
 
 	if err := writeJSON(w, http.StatusOK, post); err != nil {
 		app.internalServerError(w, r, err)
