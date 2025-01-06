@@ -25,6 +25,7 @@ type Storage struct {
 	}
 
 	Comments interface {
+		Create(context.Context, *Comment) error
 		GetByPostId(ctx context.Context, postID int64) ([]Comment, error)
 	}
 }
