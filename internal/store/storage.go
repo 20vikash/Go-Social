@@ -22,6 +22,7 @@ type Storage struct {
 
 	Users interface {
 		Create(context.Context, *User) error
+		GetUserById(context.Context, int) (*User, error)
 	}
 
 	Comments interface {
